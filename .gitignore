@@ -12,3 +12,11 @@ __pycache__/
 # Ignore everything in the workspace folder except a placeholder
 workspace/*
 !workspace/.gitkeep
+
+# Chaos harness artifacts
+chaos_state.db*
+chaos_traces/
+traces/
+
+# Eval scratch
+.pytest_cache/

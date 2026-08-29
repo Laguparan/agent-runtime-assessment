@@ -1,0 +1,56 @@
+id: S12
+name: partial_turn
+description: >
+  A turn announcing three parallel tool calls is cut off after the first.
+  Content-Length promises the whole body; the connection closes cleanly having
+  delivered part of it. Unlike S5 there is no reset -- the client sees a short,
+  well-behaved read that happens to be unparseable JSON. On retry the full turn
+  arrives, and the follow-up turn only ever acknowledges the first call.
+
+turns:
+  - kind: truncate
+    text: "Fetching all three inputs together."
+    tool_calls:
+      - name: read_file
+        id: toolu_s12_001
+        input:
+          path: notes.txt
+      - name: read_file
+        id: toolu_s12_002
+        input:
+          path: summary.txt
+      - name: run_python
+        id: toolu_s12_003
+        input:
+          code: "print(sum(range(100)))"
+
+  - kind: message
+    text: "Fetching all three inputs together."
+    tool_calls:
+      - name: read_file
+        id: toolu_s12_001
+        input:
+          path: notes.txt
+      - name: read_file
+        id: toolu_s12_002
+        input:
+          path: summary.txt
+      - name: run_python
+        id: toolu_s12_003
+        input:
+          code: "print(sum(range(100)))"
+
+  # Acknowledges only the first of the three -- the other two results are
+  # dangling as far as the model is concerned.
+  - kind: message
+    text: "The notes are enough to answer. Writing the conclusion."
+    tool_calls:
+      - name: write_file
+        id: toolu_s12_004
+        input:
+          path: conclusion.txt
+          content: "Deploy window is Thursday 02:00 UTC."
+
+  - kind: message
+    text: "Conclusion written."
+    stop_reason: end_turn

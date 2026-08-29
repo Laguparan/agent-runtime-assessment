@@ -1,0 +1,93 @@
+id: S8
+name: context_blowup
+description: >
+  Every response is twice the size of the one before it, and the tool calls keep
+  changing so no-progress detection cannot rescue the run. The only thing
+  standing between this and a blown 8,000 token ceiling is R3's compaction.
+
+  Turn 0 states a fact that is never repeated. A run that compacts by dropping
+  the oldest messages loses it; the anchored window keeps it.
+
+repeat_last: true
+
+turns:
+  # The fact. Stated once, early, and never mentioned again.
+  - kind: message
+    text: >
+      Noted for later: the deploy key fingerprint is SHA256:9f2c4e7a1b and it is
+      the only key valid for the release box. I will need that at the end.
+    tool_calls:
+      - name: read_file
+        id: toolu_s8_000
+        input:
+          path: notes.txt
+
+  - kind: message
+    grow: true
+    text: >
+      Expanding the dependency graph. Each entry in the manifest is resolved
+      against the lockfile and annotated with its resolution reason.
+    tool_calls:
+      - name: read_file
+        id: toolu_s8_001
+        input:
+          path: injected_notes.txt
+
+  - kind: message
+    grow: true
+    text: >
+      Cross-checking the transitive closure. Every edge is walked twice, once
+      forward from the root and once backward from each leaf.
+    tool_calls:
+      - name: run_python
+        id: toolu_s8_002
+        input:
+          code: "print(sum(range(1000)))"
+
+  - kind: message
+    grow: true
+    text: >
+      Recording intermediate findings so the audit trail survives a restart.
+      The annotations are verbose by design.
+    tool_calls:
+      - name: write_file
+        id: toolu_s8_003
+        input:
+          path: audit_01.txt
+          content: "intermediate findings"
+
+  - kind: message
+    grow: true
+    text: >
+      Continuing the expansion. The remaining subtrees are wider than the ones
+      already processed and the annotations grow accordingly.
+    tool_calls:
+      - name: read_file
+        id: toolu_s8_004
+        input:
+          path: audit_01.txt
+
+  - kind: message
+    grow: true
+    text: >
+      Still expanding. At this point the transcript is carrying more text than
+      any single turn needs, which is the point of the exercise.
+    tool_calls:
+      - name: run_python
+        id: toolu_s8_005
+        input:
+          code: "print(len('x' * 4096))"
+
+  # repeat_last keeps this one coming, and `grow` keeps doubling it, so the
+  # pressure never lets up. The args change every turn via the growing text
+  # only -- so a runtime that survives here survived on compaction, not luck.
+  - kind: message
+    grow: true
+    text: >
+      Final expansion pass over the remaining nodes, annotated in full for the
+      audit trail as previously described.
+    tool_calls:
+      - name: read_file
+        id: toolu_s8_006
+        input:
+          path: notes.txt

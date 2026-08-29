@@ -1,0 +1,16 @@
+id: S1
+name: happy_path
+description: Single tool call, clean result, clean finish. The control case.
+
+turns:
+  - kind: message
+    text: "I'll read the notes file to answer that."
+    tool_calls:
+      - name: read_file
+        id: toolu_s1_001
+        input:
+          path: notes.txt
+
+  - kind: message
+    text: "The notes say the deploy window is Thursday 02:00 UTC. Nothing else to do."
+    stop_reason: end_turn

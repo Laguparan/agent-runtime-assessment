@@ -1,0 +1,46 @@
+id: S2
+name: malformed_arguments
+description: >
+  Tool arguments that are not parseable JSON: a trailing comma, a raw newline
+  inside a string, and an object truncated mid-key. The agent must feed the
+  parse error back to the model and keep going, not crash and not silently
+  invent arguments.
+
+turns:
+  # Trailing comma before the closing brace.
+  - kind: message
+    text: "Writing the summary now."
+    tool_calls:
+      - name: write_file
+        id: toolu_s2_001
+        raw_arguments: '{"path": "summary.txt", "content": "first draft",}'
+
+  # Literal newline inside a JSON string, which JSON forbids.
+  - kind: message
+    text: "Retrying the write."
+    tool_calls:
+      - name: write_file
+        id: toolu_s2_002
+        raw_arguments: "{\"path\": \"summary.txt\", \"content\": \"line one\nline two\"}"
+
+  # Truncated mid-object: the value never arrives and the braces never close.
+  - kind: message
+    text: "Let me check what is already there."
+    tool_calls:
+      - name: read_file
+        id: toolu_s2_003
+        raw_arguments: '{"path": "summ'
+
+  # Finally well-formed.
+  - kind: message
+    text: "Third time lucky."
+    tool_calls:
+      - name: write_file
+        id: toolu_s2_004
+        input:
+          path: summary.txt
+          content: "first draft"
+
+  - kind: message
+    text: "Summary written to workspace/summary.txt."
+    stop_reason: end_turn

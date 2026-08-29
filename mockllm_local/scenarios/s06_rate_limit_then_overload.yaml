@@ -1,0 +1,29 @@
+id: S6
+name: rate_limit_then_overload
+description: >
+  429 with Retry-After, then 529 with no Retry-After, then 200. The cursor
+  advances on every request, so an identical retried body walks the script
+  forward. A client that ignores Retry-After or does not back off on 529
+  never reaches the 200.
+
+turns:
+  - kind: http_error
+    status: 429
+    headers:
+      Retry-After: "1"
+      X-RateLimit-Remaining: "0"
+
+  - kind: http_error
+    status: 529
+
+  - kind: message
+    text: "Back online. Reading the notes."
+    tool_calls:
+      - name: read_file
+        id: toolu_s6_001
+        input:
+          path: notes.txt
+
+  - kind: message
+    text: "Recovered from rate limiting and completed the read."
+    stop_reason: end_turn

@@ -1,0 +1,36 @@
+id: S5
+name: connection_reset
+description: >
+  The socket is reset mid-response at a random byte offset, twice, before a
+  good response arrives. Headers and part of the body have already been
+  delivered, so a client that trusts Content-Length will hang or raise
+  IncompleteRead rather than see a clean connection error.
+
+turns:
+  - kind: reset
+    text: "I'll start by reading the notes file so I can"
+    tool_calls:
+      - name: read_file
+        id: toolu_s5_001
+        input:
+          path: notes.txt
+
+  - kind: reset
+    text: "Retrying the read of the notes file now that the"
+    tool_calls:
+      - name: read_file
+        id: toolu_s5_002
+        input:
+          path: notes.txt
+
+  - kind: message
+    text: "Connection is stable now. Reading the notes."
+    tool_calls:
+      - name: read_file
+        id: toolu_s5_003
+        input:
+          path: notes.txt
+
+  - kind: message
+    text: "Got the notes on the third attempt."
+    stop_reason: end_turn

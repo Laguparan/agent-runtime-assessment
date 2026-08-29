@@ -1,0 +1,17 @@
+id: S4
+name: infinite_loop
+description: >
+  The same tool with byte-identical arguments, forever. Nothing here ever
+  terminates on its own -- R5's no-progress detection and step ceiling are the
+  only things that can stop it, and they must stop it with a legible reason.
+
+repeat_last: true
+
+turns:
+  - kind: message
+    text: "Let me check the notes."
+    tool_calls:
+      - name: read_file
+        id: toolu_s4_001
+        input:
+          path: notes.txt

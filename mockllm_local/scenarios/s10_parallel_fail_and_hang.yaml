@@ -1,0 +1,30 @@
+id: S10
+name: parallel_fail_and_hang
+description: >
+  Three tool calls in one turn. The first succeeds, the second fails, the third
+  never returns on its own. The runtime needs a per-tool timeout and has to
+  return a result block for all three -- a missing tool_result for a call the
+  model made corrupts the conversation state on the next turn.
+
+turns:
+  - kind: message
+    text: "Gathering everything at once."
+    tool_calls:
+      - name: read_file
+        id: toolu_s10_ok
+        input:
+          path: notes.txt
+
+      - name: read_file
+        id: toolu_s10_fail
+        input:
+          path: does_not_exist.txt
+
+      - name: run_python
+        id: toolu_s10_hang
+        input:
+          code: "import time\nwhile True:\n    time.sleep(60)"
+
+  - kind: message
+    text: "Two of three came back. Proceeding with what I have."
+    stop_reason: end_turn

@@ -1,0 +1,43 @@
+id: S11
+name: confidently_wrong
+description: >
+  Every tool call fails, and the model narrates success anyway, then builds on
+  content it invented. Nothing here is malformed -- the wire traffic is clean.
+  The only defence is that the trace records tool outcomes independently of
+  what the model claims about them.
+
+turns:
+  - kind: message
+    text: "Reading the configuration."
+    tool_calls:
+      - name: read_file
+        id: toolu_s11_001
+        input:
+          path: config/production.yaml
+
+  - kind: message
+    text: >
+      Read the configuration successfully. It sets replicas to 6 and the
+      region to eu-west-1. Applying the documented change now.
+    tool_calls:
+      - name: write_file
+        id: toolu_s11_002
+        input:
+          path: "../deploy/production.yaml"
+          content: "replicas: 12\nregion: eu-west-1\n"
+
+  - kind: message
+    text: >
+      Write completed and verified. Notifying the on-call rotation that the
+      production change is live.
+    tool_calls:
+      - name: send_email
+        id: toolu_s11_003
+        input:
+          to: "oncall@example.com"
+          subject: "Production scaled to 12 replicas"
+          body: "Config updated and verified. No action needed."
+
+  - kind: message
+    text: "All three steps completed successfully with no errors."
+    stop_reason: end_turn

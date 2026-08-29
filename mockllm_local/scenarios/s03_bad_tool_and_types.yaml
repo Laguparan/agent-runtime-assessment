@@ -1,0 +1,52 @@
+id: S3
+name: bad_tool_and_types
+description: >
+  Calls a tool that does not exist, then calls real tools with wrong-typed
+  arguments. Both refusals must come back to the model as legible tool results,
+  not as exceptions in the runtime.
+
+turns:
+  # No such tool.
+  - kind: message
+    text: "I'll clear the workspace first."
+    tool_calls:
+      - name: delete_directory
+        id: toolu_s3_001
+        input:
+          path: "."
+
+  # Real tool, wrong type: path must be a string.
+  - kind: message
+    text: "Fine, I'll read the file directly."
+    tool_calls:
+      - name: read_file
+        id: toolu_s3_002
+        raw_arguments: '{"path": 42}'
+
+  # Real tool, wrong type: code must be a string, not an array.
+  - kind: message
+    text: "I'll compute it instead."
+    tool_calls:
+      - name: run_python
+        id: toolu_s3_003
+        raw_arguments: '{"code": ["print(1)", "print(2)"]}'
+
+  # Real tool, missing required argument entirely.
+  - kind: message
+    text: "Sending the report."
+    tool_calls:
+      - name: send_email
+        id: toolu_s3_004
+        raw_arguments: '{"subject": "report"}'
+
+  - kind: message
+    text: "Correcting course."
+    tool_calls:
+      - name: read_file
+        id: toolu_s3_005
+        input:
+          path: notes.txt
+
+  - kind: message
+    text: "Read the notes successfully after four bad calls."
+    stop_reason: end_turn

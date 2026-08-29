@@ -1,0 +1,5 @@
+Release notes - week 34
+
+- Deploy window is Thursday 02:00 UTC.
+- Rollback is manual; the on-call engineer owns the decision.
+- The staging database snapshot is taken nightly at 23:00 UTC.

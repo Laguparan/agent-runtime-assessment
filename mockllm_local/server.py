@@ -416,6 +416,22 @@ class _ExclusiveHTTPServer(ThreadingHTTPServer):
     allow_reuse_address = False
     daemon_threads = True
 
+    def handle_error(self, request, client_address):
+        """Swallow the client-died errors the chaos harness causes on purpose.
+
+        `harness/chaos.py` SIGKILLs the agent mid-request a hundred times a run.
+        Every one of those leaves this server reading a socket that no longer has
+        a peer, and the stdlib's default is to dump a traceback per occurrence --
+        which buries the harness's actual results in noise that looks like the
+        server failing. Anything else still gets reported.
+        """
+        import sys
+
+        error = sys.exc_info()[1]
+        if isinstance(error, (ConnectionResetError, ConnectionAbortedError, BrokenPipeError)):
+            return
+        super().handle_error(request, client_address)
+
 
 def build_server(
     host: str = DEFAULT_HOST,

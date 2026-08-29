@@ -152,7 +152,7 @@ Measured, same harness as Part A:
 | | |
 |---|---|
 | S1–S12 | all survived |
-| `make chaos-fw` | 30 iterations, all 30 killed mid-run, **exactly 2 emails every time** |
+| `make chaos-fw` | 100 iterations, all 100 killed mid-run, **exactly 2 emails every time** |
 | S7 injection | 3 vectors denied, 0 emails, with email granted to another recipient |
 
 Three findings that shaped the build, all in `FRAMEWORK.md` with numbers:

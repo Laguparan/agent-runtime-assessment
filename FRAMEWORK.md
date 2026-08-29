@@ -42,13 +42,12 @@ deriving position from `ToolReturnPart` count in the persisted conversation. The
 subtlest code in the build.
 
 **2. Usage accounting stops at the framework boundary.** `usage.requests` reported
-**2** while the wire saw **4**, for both S5 and S6 — half the traffic invisible,
+**2** while the wire saw **4**, on both S5 and S6 — half the traffic invisible,
 because the SDK retries below the framework. And on any failure path there is no
-`result` object at all, so usage vanishes: S4 reported 0 steps and 0 tokens until I
-threaded my own `RunUsage` in. **Cost:** an httpx event-hook layer (`telemetry.py`)
-to count real requests, and a `usage=` object passed into every run. F4 asks for
-"every retry the framework performed on your behalf" — it will not tell you, and
-you have to instrument the layer beneath it.
+`result`, so usage vanishes entirely: S4 reported 0 steps and 0 tokens until I
+threaded my own `RunUsage` in. **Cost:** an httpx event-hook layer
+(`telemetry.py`), and a `usage=` object passed into every run. F4 asks for "every
+retry the framework performed on your behalf" — it will not tell you.
 
 **3. Checkpoint granularity is a whole turn coarser.** Part A persisted each tool
 result the instant it happened. There is no seam between "tool returned" and "turn
@@ -91,5 +90,5 @@ cost nothing, and its budget primitives beat my hand-rolled checks. If a duplica
 email merely annoyed someone, I would take the framework and the 4x speed-up without
 hesitating. Irreversibility decides it, not ergonomics.
 
-**Both builds pass the same chaos harness** (`--module agent_fw.cli`), exactly 2
-emails every time: Part A over 100 iterations, Part B over 30.
+**Both builds pass the same chaos harness**, 100 iterations each, exactly 2 emails
+every time — Part B killed mid-run 100 times out of 100.

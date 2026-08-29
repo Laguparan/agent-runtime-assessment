@@ -46,6 +46,6 @@ few milliseconds, and no amount of reading the code would have found it.
   scope for a laptop exercise. Named as unsafe in `DECISIONS.md` rather than
   half-built.
 - **Per-path locking.** Demonstrated as a failing eval (F01) instead of fixed.
-- **Part B.** Not started; `agent/framework_agent.py` and `agent/FRAMEWORK.md`
-  are from an earlier attempt and predate this runtime. They do not run against
-  it and should not be read as a Part B submission.
+- **Part B.** Not started. The `Architecture` branch holds an earlier Pydantic AI
+  sketch that predates this runtime and does not run against it; it should not
+  be read as a Part B submission.

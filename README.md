@@ -123,9 +123,10 @@ refusal never depends on recognising the injection as one.
 - **Token counts are not the real ones.** `mockllm_local/tokenizer.py` will not
   agree digit-for-digit with the assessment's. The budget is set to compact at
   6,000 against an 8,000 ceiling to leave headroom.
-- **`agent/framework_agent.py` and `agent/FRAMEWORK.md` are stale.** They are
-  from an earlier attempt, predate this runtime, and do not run against it.
-  They are not a Part B submission.
+- **Part B is not here.** This branch is Part A only. The `Architecture` branch
+  carries an earlier Pydantic AI sketch (`agent/framework_agent.py`,
+  `agent/FRAMEWORK.md`) that predates this runtime and does not run against it.
+  It is not a Part B submission either.
 
 `DECISIONS.md` names three ways this is still unsafe and defends the compaction
 strategy against the obvious alternative. `TIMELOG.md` still needs its hours

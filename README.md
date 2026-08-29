@@ -1,4 +1,4 @@
-# Adversarial Agent Runtime — Part A
+# Adversarial Agent Runtime — Parts A and B
 
 A durable, sandboxed, replayable agent runtime built without a framework.
 Python 3.11+, standard library plus PyYAML (used only by the mock server).
@@ -123,11 +123,43 @@ refusal never depends on recognising the injection as one.
 - **Token counts are not the real ones.** `mockllm_local/tokenizer.py` will not
   agree digit-for-digit with the assessment's. The budget is set to compact at
   6,000 against an 8,000 ceiling to leave headroom.
-- **Part B is not here.** This branch is Part A only. The `Architecture` branch
-  carries an earlier Pydantic AI sketch (`agent/framework_agent.py`,
-  `agent/FRAMEWORK.md`) that predates this runtime and does not run against it.
-  It is not a Part B submission either.
+- **Part B compaction cannot claim the 8k ceiling.** `agent_fw` measures token
+  pressure with our tokenizer while the framework enforces its limit with its
+  own count. The two numbers do not correspond, so compaction there reduces
+  pressure without being able to prove it stays under the ceiling. The framework's
+  `per_request_input_tokens_limit` is what actually enforces it.
+- **No replay for Part B.** `agent replay` has no framework equivalent; the
+  framework owns the decision points. Deferred with a reason in `TIMELOG.md`.
 
-`DECISIONS.md` names three ways this is still unsafe and defends the compaction
-strategy against the obvious alternative. `TIMELOG.md` still needs its hours
-filled in.
+## Part B — the same runtime on Pydantic AI
+
+`agent_fw/` rebuilds the runtime on **Pydantic AI 2.35**, pointed at the same mock
+server through its Anthropic provider. It reuses everything under `agent/` that is
+not loop control — the policy, path confinement, the effect ledger, every tool body
+and the tracer are imported unchanged — so the framework owns orchestration and
+nothing else.
+
+```bash
+make chaos-fw                # the same 100 kill/resume cycles, driving agent_fw
+make run-fw SCENARIO=S7      # interactive; needs `make serve`
+
+python -m agent_fw.cli run --task "email the report" --allow-email team@example.com
+python -m agent_fw.cli resume <run_id>
+```
+
+Measured, same harness as Part A:
+
+| | |
+|---|---|
+| S1–S12 | all survived |
+| `make chaos-fw` | 30 iterations, all 30 killed mid-run, **exactly 2 emails every time** |
+| S7 injection | 3 vectors denied, 0 emails, with email granted to another recipient |
+
+Three findings that shaped the build, all in `FRAMEWORK.md` with numbers:
+`RunContext.run_step` restarts at 1 on resume and cannot anchor an idempotency key;
+`usage.requests` reported 2 while the wire saw 4; and there is no hook to add a
+per-request header, so the mock's session addressing had to go on the transport.
+
+`DECISIONS.md` names three ways Part A is still unsafe and defends the compaction
+strategy against the obvious alternative. `FRAMEWORK.md` is the Part B write-up.
+`TIMELOG.md` still needs its hours filled in.

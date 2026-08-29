@@ -62,9 +62,14 @@ def _child_env() -> dict[str, str]:
     return env
 
 
+# Which build to drive. Part A and Part B expose the same CLI on purpose, so
+# the same harness measures both and the comparison is like-for-like.
+MODULE = "agent.cli"
+
+
 def _cli(args: list[str], db: str, traces: str, timeout: float = 60.0) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "agent.cli", "--db", db, "--traces", traces, *args],
+        [sys.executable, "-m", MODULE, "--db", db, "--traces", traces, *args],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -75,7 +80,7 @@ def _cli(args: list[str], db: str, traces: str, timeout: float = 60.0) -> subpro
 
 def _spawn(args: list[str], db: str, traces: str) -> subprocess.Popen:
     return subprocess.Popen(
-        [sys.executable, "-m", "agent.cli", "--db", db, "--traces", traces, *args],
+        [sys.executable, "-m", MODULE, "--db", db, "--traces", traces, *args],
         cwd=REPO_ROOT,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -210,7 +215,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--traces", default=os.path.join(REPO_ROOT, "chaos_traces"))
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--keep", action="store_true", help="Keep the chaos db and traces.")
+    parser.add_argument(
+        "--module",
+        default="agent.cli",
+        choices=["agent.cli", "agent_fw.cli"],
+        help="Which build to test: Part A (agent.cli) or Part B (agent_fw.cli).",
+    )
     args = parser.parse_args(argv)
+
+    global MODULE
+    MODULE = args.module
+    print(f"driving {MODULE}")
 
     if args.seed is not None:
         random.seed(args.seed)

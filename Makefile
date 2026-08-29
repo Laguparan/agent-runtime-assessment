@@ -1,4 +1,4 @@
-.PHONY: setup serve smoke test eval chaos clean
+.PHONY: setup serve smoke test eval chaos chaos-fw run-fw clean
 
 PY ?= python
 N  ?= 100
@@ -32,6 +32,16 @@ eval:
 # resumes it, and asserts send_email fired exactly once per logical send.
 chaos:
 	$(PY) harness/chaos.py -n $(N)
+
+# --- Part B (Pydantic AI) --------------------------------------------------
+# Same harness, same mock server, same assertions -- only the driven module
+# changes, which is what makes the comparison in FRAMEWORK.md like-for-like.
+chaos-fw:
+	$(PY) harness/chaos.py -n $(N) --module agent_fw.cli
+
+# Interactive Part B run. Needs `make serve`.
+run-fw:
+	$(PY) -m agent_fw.cli run --task "$(or $(TASK),summarise the notes)" 		--scenario $(or $(SCENARIO),S1)
 
 clean:
 	rm -f agent_state.db agent_state.db-wal agent_state.db-shm
